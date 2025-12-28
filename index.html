@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>School Tips - Chat Bypasser</title>
+    <title>School Tips - Secure Protocol</title>
     <style>
         :root {
             --bg: #000000;
             --surface: #0a0a0a;
             --surface-accent: #111111;
-            --accent: #a855f7; /* Purple */
+            --accent: #a855f7;
             --accent-muted: #6b21a8;
             --text: #ffffff;
             --text-dim: #94a3b8;
@@ -27,15 +27,84 @@
             color: var(--text);
             font-family: 'Inter', -apple-system, sans-serif;
             margin: 0;
-            display: flex;
-            justify-content: center;
+            overflow-x: hidden;
             min-height: 100vh;
+        }
+
+        /* Access Barrier Styles */
+        #access-barrier {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: crosshair;
+        }
+
+        .corner-trigger {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: transparent;
+            z-index: 10000;
+        }
+
+        #trigger-tl { top: 0; left: 0; }
+        #trigger-tr { top: 0; right: 0; }
+        #trigger-br { bottom: 0; right: 0; }
+        #trigger-bl { bottom: 0; left: 0; }
+
+        .passcode-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .passcode-input {
+            background: #000;
+            border: 1px solid #222;
+            color: var(--accent);
+            padding: 15px 25px;
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            text-align: center;
+            outline: none;
+            letter-spacing: 5px;
+            border-radius: 4px;
+            width: 300px;
+        }
+
+        .passcode-input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+        }
+
+        .hint-text {
+            font-size: 0.6rem;
+            color: #333;
+            margin-top: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* Main App Styles */
+        #app-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
         }
 
         .container {
             width: 100%;
             max-width: 1200px;
             padding: 40px 20px;
+            margin: 0 auto;
             display: flex;
             flex-direction: column;
         }
@@ -100,7 +169,6 @@
             background: var(--border);
         }
 
-        /* Editor Area */
         textarea {
             width: 100%;
             background: transparent;
@@ -132,7 +200,6 @@
             position: relative;
         }
 
-        /* Sidebar UI */
         .sidebar {
             display: flex;
             flex-direction: column;
@@ -203,7 +270,6 @@
             margin-top: 20px;
         }
 
-        /* Toggles */
         .option-item {
             display: flex;
             justify-content: space-between;
@@ -255,7 +321,6 @@
             -webkit-appearance: none;
         }
 
-        /* Tooltips */
         [data-tooltip] { position: relative; }
         [data-tooltip]::after {
             content: attr(data-tooltip);
@@ -281,124 +346,176 @@
             color: var(--text-dim);
             text-align: center;
             opacity: 0.5;
+            padding-bottom: 20px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
         }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <header>
-        <div>
-            <h1>School Tips</h1>
-            <div class="subtitle">Secure Text Protocol</div>
-        </div>
-        <div style="text-align: right">
-            <span style="font-size: 0.7rem; color: var(--accent)">STATUS: OPERATIONAL</span>
-        </div>
-    </header>
+<!-- Hidden Entry System -->
+<div id="access-barrier">
+    <div class="corner-trigger" id="trigger-tl"></div>
+    <div class="corner-trigger" id="trigger-tr"></div>
+    <div class="corner-trigger" id="trigger-br"></div>
+    <div class="corner-trigger" id="trigger-bl"></div>
 
-    <div class="layout">
-        <!-- Main Workspace -->
-        <div class="workspace">
-            <div class="card">
-                <div class="section-header">Terminal Input</div>
-                <textarea id="input-text" placeholder="Type or paste text for bypass generation..."></textarea>
-                
-                <div class="section-header">Filtered Output</div>
-                <div class="output-box" id="output-text">Awaiting source...</div>
-                
-                <div style="display: flex; gap: 10px; margin-top: 20px;">
-                    <button class="btn primary" id="copy-btn">Copy to Clipboard</button>
-                    <button class="btn" id="dl-btn" style="width: 200px">Download .txt</button>
-                </div>
-            </div>
-
-            <div class="card" style="margin-top: 20px;">
-                <div class="section-header">Live Analysis</div>
-                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: 0.75rem;">
-                    <div>
-                        <div style="color: var(--text-dim)">Length Increase</div>
-                        <div id="stat-length" style="color: var(--accent); font-weight: 800">0%</div>
-                    </div>
-                    <div>
-                        <div style="color: var(--text-dim)">Entropy Rank</div>
-                        <div id="stat-entropy" style="color: var(--accent); font-weight: 800">Low</div>
-                    </div>
-                    <div>
-                        <div style="color: var(--text-dim)">Platform Risk</div>
-                        <div id="stat-risk" style="color: var(--accent); font-weight: 800">Minimal</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Configuration Sidebar -->
-        <div class="sidebar">
-            <div class="card">
-                <div class="section-header">Engine Config</div>
-                
-                <div class="control-group">
-                    <label>Bypass Strength: <span id="str-val" style="color: var(--accent)">50</span></label>
-                    <input type="range" id="strength-slider" min="0" max="100" value="50">
-                </div>
-
-                <label>Bypass Presets</label>
-                <div class="btn-grid">
-                    <button class="btn mode-btn active" data-mode="balanced">Balanced</button>
-                    <button class="btn mode-btn" data-mode="aggressive">Aggressive</button>
-                    <button class="btn mode-btn" data-mode="invisible">Ghost</button>
-                    <button class="btn mode-btn" data-mode="custom">Custom</button>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="section-header">Unicode Modules</div>
-                <div id="module-toggles">
-                    <div class="option-item">
-                        <span data-tooltip="Swap characters with visually similar ones">Homoglyphs</span>
-                        <div class="switch on" id="opt-homo"></div>
-                    </div>
-                    <div class="option-item">
-                        <span data-tooltip="Insert invisible zero-width spaces">ZWSP Injection</span>
-                        <div class="switch on" id="opt-zwsp"></div>
-                    </div>
-                    <div class="option-item">
-                        <span data-tooltip="Use mathematical bold/script fonts">Math Scripts</span>
-                        <div class="switch" id="opt-math"></div>
-                    </div>
-                    <div class="option-item">
-                        <span data-tooltip="Add invisible combining character noise">Combining Marks</span>
-                        <div class="switch on" id="opt-marks"></div>
-                    </div>
-                    <div class="option-item">
-                        <span data-tooltip="Use rare small-cap variants">Small Caps</span>
-                        <div class="switch" id="opt-small"></div>
-                    </div>
-                    <div class="option-item">
-                        <span data-tooltip="Break keyword normalization rules">Anti-Normalization</span>
-                        <div class="switch on" id="opt-anti"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="section-header">Meta</div>
-                <div class="option-item">
-                    <span>Auto-Copy Result</span>
-                    <div class="switch" id="opt-autocopy"></div>
-                </div>
-                <button class="btn" id="shuffle-btn" style="width: 100%; margin-top: 10px;">Shuffle Random Seed</button>
-                <a href="https://www.youtube.com/@schooltips-e6t" target="_blank" class="sub-btn">Subscribe to Channel</a>
-            </div>
-        </div>
+    <div class="passcode-container" id="passcode-ui">
+        <div style="margin-bottom: 20px; font-weight: 800; letter-spacing: 5px; color: #222;">AUTHENTICATION REQUIRED</div>
+        <input type="password" class="passcode-input" id="passcode-field" placeholder="••••••••">
+        <div class="hint-text">Node validation complete. Enter sequence.</div>
     </div>
+</div>
 
-    <footer>
-        Bypass Protocol v4.2 // SHA-X Verified // Pure Client-Side Implementation
-    </footer>
+<!-- Main Application Content -->
+<div id="app-content">
+    <div class="container">
+        <header>
+            <div>
+                <h1>School Tips</h1>
+                <div class="subtitle">Secure Text Protocol</div>
+            </div>
+            <div style="text-align: right">
+                <span style="font-size: 0.7rem; color: var(--accent); animation: pulse 2s infinite">● STATUS: OPERATIONAL</span>
+            </div>
+        </header>
+
+        <div class="layout">
+            <div class="workspace">
+                <div class="card">
+                    <div class="section-header">Terminal Input</div>
+                    <textarea id="input-text" placeholder="Type or paste text for bypass generation..."></textarea>
+                    
+                    <div class="section-header">Filtered Output</div>
+                    <div class="output-box" id="output-text">Awaiting source...</div>
+                    
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn primary" id="copy-btn">Copy to Clipboard</button>
+                        <button class="btn" id="dl-btn" style="width: 200px">Download .txt</button>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="section-header">Live Analysis</div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: 0.75rem;">
+                        <div>
+                            <div style="color: var(--text-dim)">Length Increase</div>
+                            <div id="stat-length" style="color: var(--accent); font-weight: 800">0%</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-dim)">Entropy Rank</div>
+                            <div id="stat-entropy" style="color: var(--accent); font-weight: 800">Low</div>
+                        </div>
+                        <div>
+                            <div style="color: var(--text-dim)">Platform Risk</div>
+                            <div id="stat-risk" style="color: var(--accent); font-weight: 800">Minimal</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="card">
+                    <div class="section-header">Engine Config</div>
+                    <div class="control-group">
+                        <label>Bypass Strength: <span id="str-val" style="color: var(--accent)">50</span></label>
+                        <input type="range" id="strength-slider" min="0" max="100" value="50">
+                    </div>
+
+                    <label>Bypass Presets</label>
+                    <div class="btn-grid">
+                        <button class="btn mode-btn active" data-mode="balanced">Balanced</button>
+                        <button class="btn mode-btn" data-mode="aggressive">Aggressive</button>
+                        <button class="btn mode-btn" data-mode="invisible">Ghost</button>
+                        <button class="btn mode-btn" data-mode="custom">Custom</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-header">Unicode Modules</div>
+                    <div id="module-toggles">
+                        <div class="option-item">
+                            <span data-tooltip="Swap characters with visually similar ones">Homoglyphs</span>
+                            <div class="switch on" id="opt-homo"></div>
+                        </div>
+                        <div class="option-item">
+                            <span data-tooltip="Insert invisible zero-width spaces">ZWSP Injection</span>
+                            <div class="switch on" id="opt-zwsp"></div>
+                        </div>
+                        <div class="option-item">
+                            <span data-tooltip="Use mathematical bold/script fonts">Math Scripts</span>
+                            <div class="switch" id="opt-math"></div>
+                        </div>
+                        <div class="option-item">
+                            <span data-tooltip="Add invisible combining character noise">Combining Marks</span>
+                            <div class="switch on" id="opt-marks"></div>
+                        </div>
+                        <div class="option-item">
+                            <span data-tooltip="Use rare small-cap variants">Small Caps</span>
+                            <div class="switch" id="opt-small"></div>
+                        </div>
+                        <div class="option-item">
+                            <span data-tooltip="Break keyword normalization rules">Anti-Normalization</span>
+                            <div class="switch on" id="opt-anti"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="section-header">Meta</div>
+                    <div class="option-item">
+                        <span>Auto-Copy Result</span>
+                        <div class="switch" id="opt-autocopy"></div>
+                    </div>
+                    <button class="btn" id="shuffle-btn" style="width: 100%; margin-top: 10px;">Shuffle Random Seed</button>
+                    <a href="https://www.youtube.com/@schooltips-e6t" target="_blank" class="sub-btn">Subscribe to Channel</a>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Bypass Protocol v4.2 // SHA-X Verified // Pure Client-Side Implementation
+        </footer>
+    </div>
 </div>
 
 <script>
+    // --- Entry System Logic ---
+    let cornersClicked = { tl: false, tr: false, br: false, bl: false };
+    const PASSCODE = "schooltipsonyt";
+
+    function checkCorners() {
+        if (cornersClicked.tl && cornersClicked.tr && cornersClicked.br && cornersClicked.bl) {
+            document.getElementById('passcode-ui').style.display = 'block';
+            document.getElementById('passcode-field').focus();
+        }
+    }
+
+    document.getElementById('trigger-tl').onclick = () => { cornersClicked.tl = true; checkCorners(); };
+    document.getElementById('trigger-tr').onclick = () => { cornersClicked.tr = true; checkCorners(); };
+    document.getElementById('trigger-br').onclick = () => { cornersClicked.br = true; checkCorners(); };
+    document.getElementById('trigger-bl').onclick = () => { cornersClicked.bl = true; checkCorners(); };
+
+    document.getElementById('passcode-field').addEventListener('input', (e) => {
+        if (e.target.value.toLowerCase() === PASSCODE) {
+            document.getElementById('access-barrier').style.display = 'none';
+            const app = document.getElementById('app-content');
+            app.style.display = 'block';
+            setTimeout(() => app.style.opacity = '1', 50);
+        }
+    });
+
+    // --- Core Application Logic ---
     const DATA = {
         homoglyphs: {
             'a': ['а', 'α', 'a', 'а'], 'b': ['b', 'Ь', 'β'], 'c': ['c', 'с', 'ϲ'],
@@ -447,7 +564,6 @@
             let evolved = char;
             let lower = char.toLowerCase();
 
-            // 1. Structural
             if (config.options.math && DATA.math[lower] && Math.random() < prob) {
                 evolved = DATA.math[lower];
             } else if (config.options.small && DATA.small[lower] && Math.random() < prob) {
@@ -458,12 +574,10 @@
                 if (char === char.toUpperCase()) evolved = evolved.toUpperCase();
             }
 
-            // 2. Invisible injection
             if (config.options.zwsp && Math.random() < prob) {
                 evolved += DATA.zw[Math.floor(Math.random() * DATA.zw.length)];
             }
 
-            // 3. Mark injection
             if (config.options.marks && Math.random() < (prob * 0.4)) {
                 evolved += DATA.marks[Math.floor(Math.random() * DATA.marks.length)];
             }
@@ -471,7 +585,6 @@
             out += evolved;
         }
 
-        // 4. Global Anti-Norm
         if (config.options.anti) {
             out = out.normalize('NFD');
         }
@@ -484,7 +597,6 @@
         const result = bypass(source);
         dom.output.textContent = result;
 
-        // Update Stats
         const inc = source.length ? Math.round(((result.length - source.length) / source.length) * 100) : 0;
         document.getElementById('stat-length').textContent = `${inc}%`;
         document.getElementById('stat-entropy').textContent = config.strength > 70 ? "Extreme" : (config.strength > 40 ? "High" : "Mid");
@@ -516,7 +628,6 @@
         }
     }
 
-    // Event Listeners
     dom.input.addEventListener('input', update);
     dom.shuffleBtn.addEventListener('click', update);
     dom.copyBtn.addEventListener('click', () => copy(true));
@@ -535,7 +646,6 @@
         update();
     });
 
-    // Toggle logic
     document.querySelectorAll('.switch').forEach(sw => {
         sw.addEventListener('click', () => {
             sw.classList.toggle('on');
@@ -545,12 +655,10 @@
         });
     });
 
-    // Preset logic
     document.querySelectorAll('.mode-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            
             const mode = btn.dataset.mode;
             if (mode === 'balanced') {
                 config.strength = 50;
@@ -562,7 +670,6 @@
                 config.strength = 30;
                 setToggles({homo: false, zwsp: true, math: false, marks: false, small: false, anti: true});
             }
-            
             dom.strSlider.value = config.strength;
             dom.strVal.textContent = config.strength;
             update();
