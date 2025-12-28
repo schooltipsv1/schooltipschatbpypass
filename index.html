@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>School Tips - Chat Bypasser</title>
+    <style>
+        :root {
+            --bg: #000000;
+            --surface: #0a0a0a;
+            --surface-accent: #111111;
+            --accent: #a855f7; /* Purple */
+            --accent-muted: #6b21a8;
+            --text: #ffffff;
+            --text-dim: #94a3b8;
+            --border: #262626;
+            --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', -apple-system, sans-serif;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            margin-bottom: 40px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 900;
+            margin: 0;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+        }
+
+        .subtitle {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .layout { grid-template-columns: 1fr; }
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 24px;
+        }
+
+        .section-header {
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: var(--accent);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-header::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        /* Editor Area */
+        textarea {
+            width: 100%;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 15px;
+            font-family: var(--font-mono);
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 150px;
+            outline: none;
+            margin-bottom: 20px;
+        }
+
+        textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .output-box {
+            background: var(--surface-accent);
+            border: 1px solid var(--border);
+            padding: 20px;
+            min-height: 120px;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            color: var(--accent);
+            word-break: break-all;
+            white-space: pre-wrap;
+            position: relative;
+        }
+
+        /* Sidebar UI */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            margin-bottom: 10px;
+        }
+
+        .btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .btn {
+            background: var(--surface-accent);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 2px;
+        }
+
+        .btn:hover {
+            border-color: var(--accent);
+            background: #1a1a1a;
+        }
+
+        .btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+        }
+
+        .btn.primary {
+            background: var(--text);
+            color: #000;
+            width: 100%;
+            font-weight: 800;
+            margin-top: 10px;
+        }
+
+        .btn.primary:hover {
+            background: var(--accent);
+        }
+
+        .sub-btn {
+            background: #ff0000;
+            color: #fff;
+            padding: 12px;
+            text-decoration: none;
+            text-align: center;
+            font-weight: 800;
+            font-size: 0.8rem;
+            display: block;
+            margin-top: 20px;
+        }
+
+        /* Toggles */
+        .option-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #111;
+        }
+
+        .option-item span {
+            font-size: 0.8rem;
+            color: var(--text-dim);
+        }
+
+        .switch {
+            width: 30px;
+            height: 16px;
+            background: #333;
+            border-radius: 10px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .switch.on {
+            background: var(--accent);
+        }
+
+        .switch::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: 0.2s;
+        }
+
+        .switch.on::after {
+            left: 16px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--accent);
+            background: var(--border);
+            height: 4px;
+            border-radius: 2px;
+            -webkit-appearance: none;
+        }
+
+        /* Tooltips */
+        [data-tooltip] { position: relative; }
+        [data-tooltip]::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #111;
+            border: 1px solid var(--accent);
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 0.7rem;
+            white-space: nowrap;
+            visibility: hidden;
+            opacity: 0;
+            z-index: 10;
+        }
+        [data-tooltip]:hover::after { visibility: visible; opacity: 1; }
+
+        footer {
+            margin-top: 40px;
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-align: center;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>School Tips</h1>
+            <div class="subtitle">Secure Text Protocol</div>
+        </div>
+        <div style="text-align: right">
+            <span style="font-size: 0.7rem; color: var(--accent)">STATUS: OPERATIONAL</span>
+        </div>
+    </header>
+
+    <div class="layout">
+        <!-- Main Workspace -->
+        <div class="workspace">
+            <div class="card">
+                <div class="section-header">Terminal Input</div>
+                <textarea id="input-text" placeholder="Type or paste text for bypass generation..."></textarea>
+                
+                <div class="section-header">Filtered Output</div>
+                <div class="output-box" id="output-text">Awaiting source...</div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn primary" id="copy-btn">Copy to Clipboard</button>
+                    <button class="btn" id="dl-btn" style="width: 200px">Download .txt</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="section-header">Live Analysis</div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; font-size: 0.75rem;">
+                    <div>
+                        <div style="color: var(--text-dim)">Length Increase</div>
+                        <div id="stat-length" style="color: var(--accent); font-weight: 800">0%</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-dim)">Entropy Rank</div>
+                        <div id="stat-entropy" style="color: var(--accent); font-weight: 800">Low</div>
+                    </div>
+                    <div>
+                        <div style="color: var(--text-dim)">Platform Risk</div>
+                        <div id="stat-risk" style="color: var(--accent); font-weight: 800">Minimal</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Sidebar -->
+        <div class="sidebar">
+            <div class="card">
+                <div class="section-header">Engine Config</div>
+                
+                <div class="control-group">
+                    <label>Bypass Strength: <span id="str-val" style="color: var(--accent)">50</span></label>
+                    <input type="range" id="strength-slider" min="0" max="100" value="50">
+                </div>
+
+                <label>Bypass Presets</label>
+                <div class="btn-grid">
+                    <button class="btn mode-btn active" data-mode="balanced">Balanced</button>
+                    <button class="btn mode-btn" data-mode="aggressive">Aggressive</button>
+                    <button class="btn mode-btn" data-mode="invisible">Ghost</button>
+                    <button class="btn mode-btn" data-mode="custom">Custom</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-header">Unicode Modules</div>
+                <div id="module-toggles">
+                    <div class="option-item">
+                        <span data-tooltip="Swap characters with visually similar ones">Homoglyphs</span>
+                        <div class="switch on" id="opt-homo"></div>
+                    </div>
+                    <div class="option-item">
+                        <span data-tooltip="Insert invisible zero-width spaces">ZWSP Injection</span>
+                        <div class="switch on" id="opt-zwsp"></div>
+                    </div>
+                    <div class="option-item">
+                        <span data-tooltip="Use mathematical bold/script fonts">Math Scripts</span>
+                        <div class="switch" id="opt-math"></div>
+                    </div>
+                    <div class="option-item">
+                        <span data-tooltip="Add invisible combining character noise">Combining Marks</span>
+                        <div class="switch on" id="opt-marks"></div>
+                    </div>
+                    <div class="option-item">
+                        <span data-tooltip="Use rare small-cap variants">Small Caps</span>
+                        <div class="switch" id="opt-small"></div>
+                    </div>
+                    <div class="option-item">
+                        <span data-tooltip="Break keyword normalization rules">Anti-Normalization</span>
+                        <div class="switch on" id="opt-anti"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-header">Meta</div>
+                <div class="option-item">
+                    <span>Auto-Copy Result</span>
+                    <div class="switch" id="opt-autocopy"></div>
+                </div>
+                <button class="btn" id="shuffle-btn" style="width: 100%; margin-top: 10px;">Shuffle Random Seed</button>
+                <a href="https://www.youtube.com/@schooltips-e6t" target="_blank" class="sub-btn">Subscribe to Channel</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Bypass Protocol v4.2 // SHA-X Verified // Pure Client-Side Implementation
+    </footer>
+</div>
+
+<script>
+    const DATA = {
+        homoglyphs: {
+            'a': ['а', 'α', 'a', 'а'], 'b': ['b', 'Ь', 'β'], 'c': ['c', 'с', 'ϲ'],
+            'd': ['d', 'ԁ'], 'e': ['e', 'е', 'ε'], 'f': ['f', 'f'],
+            'g': ['g', 'ɡ'], 'h': ['h', 'һ'], 'i': ['i', 'і', 'ι'],
+            'j': ['j', 'ј'], 'k': ['k', 'к'], 'l': ['l', 'ӏ'],
+            'm': ['m', 'm'], 'n': ['n', 'ո'], 'o': ['o', 'о', 'ο'],
+            'p': ['p', 'р', 'ρ'], 'q': ['q', 'q'], 'r': ['r', 'r'],
+            's': ['s', 'ѕ'], 't': ['t', 'τ'], 'u': ['u', 'ս'],
+            'v': ['v', 'ν'], 'w': ['w', 'ԝ'], 'x': ['x', 'х'],
+            'y': ['y', 'у'], 'z': ['z', 'z']
+        },
+        math: {
+            'a': '𝕒', 'b': '𝕓', 'c': '𝕔', 'd': '𝕕', 'e': '𝕖', 'f': '𝕗', 'g': '𝕘', 'h': '𝕙', 'i': '𝕚', 'j': '𝕛', 'k': '𝕜', 'l': '𝕝', 'm': '𝕞', 'n': '𝕟', 'o': '𝕠', 'p': '𝕡', 'q': '𝕢', 'r': '𝕣', 's': '𝕤', 't': '𝕥', 'u': '𝕦', 'v': '𝕧', 'w': '𝕨', 'x': '𝕩', 'y': '𝕪', 'z': '𝕫'
+        },
+        small: {
+            'a': 'ᴀ', 'b': 'ʙ', 'c': 'ᴄ', 'd': 'ᴅ', 'e': 'ᴇ', 'f': 'ғ', 'g': 'ɢ', 'h': 'ʜ', 'i': 'ɪ', 'j': 'ᴊ', 'k': 'ᴋ', 'l': 'ʟ', 'm': 'ᴍ', 'n': 'ɴ', 'o': 'ᴏ', 'p': 'ᴘ', 'q': 'ǫ', 'r': 'ʀ', 's': 's', 't': 'ᴛ', 'u': 'ᴜ', 'v': 'ᴠ', 'w': 'ᴡ', 'x': 'x', 'y': 'ʏ', 'z': 'ᴢ'
+        },
+        marks: ['\u0300', '\u0301', '\u0302', '\u0304', '\u0306', '\u0308', '\u034f'],
+        zw: ['\u200B', '\u200C', '\u200D']
+    };
+
+    const config = {
+        strength: 50,
+        options: {
+            homo: true, zwsp: true, math: false, marks: true, small: false, anti: true, autocopy: false
+        }
+    };
+
+    const dom = {
+        input: document.getElementById('input-text'),
+        output: document.getElementById('output-text'),
+        strSlider: document.getElementById('strength-slider'),
+        strVal: document.getElementById('str-val'),
+        copyBtn: document.getElementById('copy-btn'),
+        dlBtn: document.getElementById('dl-btn'),
+        shuffleBtn: document.getElementById('shuffle-btn')
+    };
+
+    function bypass(text) {
+        if (!text) return "Awaiting source...";
+        let out = "";
+        const prob = config.strength / 100;
+
+        for (let char of text) {
+            let evolved = char;
+            let lower = char.toLowerCase();
+
+            // 1. Structural
+            if (config.options.math && DATA.math[lower] && Math.random() < prob) {
+                evolved = DATA.math[lower];
+            } else if (config.options.small && DATA.small[lower] && Math.random() < prob) {
+                evolved = DATA.small[lower];
+            } else if (config.options.homo && DATA.homoglyphs[lower] && Math.random() < (prob * 1.5)) {
+                const arr = DATA.homoglyphs[lower];
+                evolved = arr[Math.floor(Math.random() * arr.length)];
+                if (char === char.toUpperCase()) evolved = evolved.toUpperCase();
+            }
+
+            // 2. Invisible injection
+            if (config.options.zwsp && Math.random() < prob) {
+                evolved += DATA.zw[Math.floor(Math.random() * DATA.zw.length)];
+            }
+
+            // 3. Mark injection
+            if (config.options.marks && Math.random() < (prob * 0.4)) {
+                evolved += DATA.marks[Math.floor(Math.random() * DATA.marks.length)];
+            }
+
+            out += evolved;
+        }
+
+        // 4. Global Anti-Norm
+        if (config.options.anti) {
+            out = out.normalize('NFD');
+        }
+
+        return out;
+    }
+
+    function update() {
+        const source = dom.input.value;
+        const result = bypass(source);
+        dom.output.textContent = result;
+
+        // Update Stats
+        const inc = source.length ? Math.round(((result.length - source.length) / source.length) * 100) : 0;
+        document.getElementById('stat-length').textContent = `${inc}%`;
+        document.getElementById('stat-entropy').textContent = config.strength > 70 ? "Extreme" : (config.strength > 40 ? "High" : "Mid");
+        document.getElementById('stat-risk').textContent = config.strength > 80 ? "Detected" : "Clean";
+
+        if (config.options.autocopy && source) {
+            copy(false);
+        }
+    }
+
+    function copy(notify = true) {
+        const t = dom.output.textContent;
+        if (t === "Awaiting source...") return;
+        const el = document.createElement('textarea');
+        el.value = t;
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+
+        if (notify) {
+            const original = dom.copyBtn.textContent;
+            dom.copyBtn.textContent = "Copied Success!";
+            dom.copyBtn.style.background = "var(--accent)";
+            setTimeout(() => {
+                dom.copyBtn.textContent = original;
+                dom.copyBtn.style.background = "var(--text)";
+            }, 1000);
+        }
+    }
+
+    // Event Listeners
+    dom.input.addEventListener('input', update);
+    dom.shuffleBtn.addEventListener('click', update);
+    dom.copyBtn.addEventListener('click', () => copy(true));
+
+    dom.dlBtn.addEventListener('click', () => {
+        const blob = new Blob([dom.output.textContent], {type: 'text/plain'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = "bypass_output.txt";
+        a.click();
+    });
+
+    dom.strSlider.addEventListener('input', (e) => {
+        config.strength = e.target.value;
+        dom.strVal.textContent = config.strength;
+        update();
+    });
+
+    // Toggle logic
+    document.querySelectorAll('.switch').forEach(sw => {
+        sw.addEventListener('click', () => {
+            sw.classList.toggle('on');
+            const key = sw.id.split('-')[1];
+            config.options[key] = sw.classList.contains('on');
+            update();
+        });
+    });
+
+    // Preset logic
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            const mode = btn.dataset.mode;
+            if (mode === 'balanced') {
+                config.strength = 50;
+                setToggles({homo: true, zwsp: true, math: false, marks: true, small: false, anti: true});
+            } else if (mode === 'aggressive') {
+                config.strength = 90;
+                setToggles({homo: true, zwsp: true, math: true, marks: true, small: true, anti: true});
+            } else if (mode === 'invisible') {
+                config.strength = 30;
+                setToggles({homo: false, zwsp: true, math: false, marks: false, small: false, anti: true});
+            }
+            
+            dom.strSlider.value = config.strength;
+            dom.strVal.textContent = config.strength;
+            update();
+        });
+    });
+
+    function setToggles(opts) {
+        for (let key in opts) {
+            config.options[key] = opts[key];
+            const el = document.getElementById(`opt-${key}`);
+            if (el) {
+                opts[key] ? el.classList.add('on') : el.classList.remove('on');
+            }
+        }
+    }
+</script>
+
+</body>
+</html>
